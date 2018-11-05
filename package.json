@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "webpack-dev-server --open"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.1.2",
     "@babel/preset-env": "^7.1.0",
+    "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
     "html-webpack-plugin": "^3.2.0",
     "webpack": "^4.24.0",
@@ -18,6 +20,7 @@
     "webpack-dev-server": "^3.1.10"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.0.0"
+    "@babel/polyfill": "^7.0.0",
+    "raw-loader": "^0.5.1"
   }
 }
