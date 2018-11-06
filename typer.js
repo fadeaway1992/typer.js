@@ -1,11 +1,10 @@
-const endOfSentence = /[\.\?\!\。\？\！]\s$/
-const comma = /(\D[\,])|(.\，)\s$/
-const endOfBlock = /[^\/]\n\n$/
+const endOfSentence = /[\.\?\!\。\？\！]$/
+const comma = /(\D[\,])|(.\，)$/
 
 class Typer {
   
-  constructor ({interval = 10}) {
-    this.interval = interval
+  constructor ({interval = 0.1}) {
+    this.interval = interval * 1000
     this.fullText = ''
     this.paused = false
   }
@@ -21,7 +20,9 @@ class Typer {
   async type (element, text, index = 0) {
     let chars
     let multi = false
-    const multiType = /\[(.*?)\]/
+    const multiType = /\[(.*?)(delay(\d+))?\]/
+    const deleteChars = /\[-(\d+)(delay(\d+))?\]/
+    let customDelay = false
 
     if (/\[/.test(text.charAt(index))) {
       chars = text.slice(index).match(multiType)[0]
@@ -34,9 +35,20 @@ class Typer {
 
 
     if (multi) {
-      this.fullText += chars.replace(multiType, (match, p1) => {
-        return p1
-      })
+      let deleteArray = deleteChars.exec(chars)
+      if (deleteArray) {
+        this.fullText = this.fullText.slice(0, -deleteArray[1])
+        if (deleteArray[3]) {
+          customDelay = deleteArray[3] * 1000
+        }
+      } else {
+        this.fullText += chars.replace(multiType, (match, p1, p2, p3) => {
+          if (p3) {
+            customDelay = p3 * 1000
+          }
+          return p1
+        })
+      }
     } else {
       this.fullText += chars
     }
@@ -44,15 +56,12 @@ class Typer {
     element.innerHTML = this.fullText
 
     let thisInterval = this.interval
-    let thisSlice = text.slice(index - 1, index + 2);
+    let thisSlice = text.slice(index - 1, index + 1);
     if (multi) {
-      thisInterval = this.interval * 5
+      thisInterval = customDelay || this.interval
     } else {
       if (comma.test(thisSlice)) {
         thisInterval = this.interval * 3
-      }
-      if (endOfBlock.test(thisSlice)) {
-        thisInterval = this.interval * 7
       }
       if (endOfSentence.test(thisSlice)) {
         thisInterval = this.interval * 5
@@ -67,6 +76,22 @@ class Typer {
     if (index < text.length) {
       return this.type(element, text, index)
     }
+  }
+
+  pauseOrResume () {
+    this.paused = !this.paused
+  }
+  
+  changeInterVal (interval) {
+    this.interval = interval * 1000
+  }
+
+  speedUp () {
+    this.interval  = this.interval * 0.8
+  }
+
+  speedDown () {
+    this.interval = this.interval * 1.2
   }
 }
 
